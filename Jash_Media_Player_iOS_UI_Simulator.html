@@ -1,0 +1,924 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Jash Media Player — Pure iOS 18 Android UI Simulator</title>
+<style>
+  :root {
+    --ios-bg: #000000;
+    --ios-card: #1C1C1E;
+    --ios-card-elevated: #2C2C2E;
+    --ios-frosted: rgba(28, 28, 30, 0.78);
+    --ios-pill: rgba(44, 44, 46, 0.82);
+    --ios-border: rgba(255, 255, 255, 0.16);
+    --ios-blue: #0A84FF;
+    --ios-cyan: #32ADE6;
+    --ios-indigo: #5E5CE6;
+    --ios-green: #30D158;
+    --ios-orange: #FF9F0A;
+    --ios-red: #FF453A;
+    --text-primary: #FFFFFF;
+    --text-secondary: rgba(235, 235, 245, 0.62);
+    --text-tertiary: rgba(235, 235, 245, 0.36);
+  }
+  * {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+    font-family: -apple-system, BlinkMacSystemFont, "SF Pro Display", "SF Pro Text", "Segoe UI", Roboto, sans-serif;
+    -webkit-font-smoothing: antialiased;
+    user-select: none;
+  }
+  body {
+    background: radial-gradient(circle at 20% 10%, #11192e 0%, #050508 65%);
+    color: var(--text-primary);
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding: 24px 16px 48px;
+  }
+  .top-banner {
+    max-width: 1120px;
+    width: 100%;
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: space-between;
+    align-items: center;
+    gap: 16px;
+    margin-bottom: 24px;
+    padding: 18px 24px;
+    border-radius: 20px;
+    background: rgba(28, 28, 30, 0.72);
+    backdrop-filter: blur(20px);
+    border: 1px solid var(--ios-border);
+  }
+  .brand-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 12px;
+    font-weight: 700;
+    letter-spacing: 1.2px;
+    color: var(--ios-cyan);
+    text-transform: uppercase;
+  }
+  .top-banner h1 {
+    font-size: 24px;
+    font-weight: 800;
+    letter-spacing: -0.4px;
+    margin-top: 4px;
+  }
+  .mode-switch-bar {
+    display: flex;
+    gap: 8px;
+    flex-wrap: wrap;
+  }
+  .mode-btn {
+    padding: 10px 16px;
+    border-radius: 999px;
+    border: 1px solid var(--ios-border);
+    background: var(--ios-card-elevated);
+    color: #fff;
+    font-size: 13px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.2s ease;
+  }
+  .mode-btn.active, .mode-btn:hover {
+    background: var(--ios-blue);
+    border-color: rgba(255,255,255,0.45);
+    box-shadow: 0 4px 16px rgba(10, 132, 255, 0.4);
+  }
+  .workspace-grid {
+    max-width: 1120px;
+    width: 100%;
+    display: grid;
+    grid-template-columns: 390px 1fr;
+    gap: 28px;
+    align-items: start;
+  }
+  @media (max-width: 900px) {
+    .workspace-grid {
+      grid-template-columns: 1fr;
+      justify-items: center;
+    }
+  }
+  /* iOS 18 Phone Frame */
+  .iphone-frame {
+    width: 390px;
+    height: 780px;
+    background: #000;
+    border-radius: 48px;
+    border: 8px solid #262629;
+    box-shadow: 0 25px 70px rgba(0,0,0,0.8), 0 0 0 1px rgba(255,255,255,0.12);
+    position: relative;
+    overflow: hidden;
+    display: flex;
+    flex-direction: column;
+  }
+  .status-bar {
+    height: 44px;
+    padding: 0 26px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    font-size: 13px;
+    font-weight: 600;
+    z-index: 10;
+  }
+  .dynamic-island {
+    width: 110px;
+    height: 26px;
+    background: #0b0b0d;
+    border-radius: 20px;
+    border: 1px solid rgba(255,255,255,0.08);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 10px;
+    color: var(--ios-cyan);
+    gap: 4px;
+  }
+  .screen-body {
+    flex: 1;
+    overflow-y: auto;
+    padding: 8px 16px 90px;
+  }
+  .ios-header-sub {
+    color: var(--ios-blue);
+    font-size: 11px;
+    font-weight: 700;
+    letter-spacing: 1.2px;
+  }
+  .ios-header-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 12px;
+  }
+  .ios-large-title {
+    font-size: 30px;
+    font-weight: 800;
+    letter-spacing: -0.6px;
+  }
+  .circle-icon-btn {
+    width: 36px;
+    height: 36px;
+    border-radius: 50%;
+    background: var(--ios-card);
+    border: 1px solid var(--ios-border);
+    color: var(--ios-blue);
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    font-size: 15px;
+  }
+  .ios-search {
+    width: 100%;
+    background: var(--ios-card);
+    border: 1px solid transparent;
+    border-radius: 12px;
+    padding: 10px 14px;
+    color: #fff;
+    font-size: 14px;
+    margin-bottom: 12px;
+    outline: none;
+  }
+  .ios-search:focus {
+    border-color: var(--ios-blue);
+  }
+  .segmented-control {
+    display: flex;
+    background: var(--ios-card);
+    border-radius: 10px;
+    padding: 3px;
+    border: 1px solid var(--ios-border);
+    margin-bottom: 14px;
+  }
+  .seg-item {
+    flex: 1;
+    text-align: center;
+    padding: 6px 4px;
+    font-size: 12px;
+    font-weight: 600;
+    color: var(--text-secondary);
+    border-radius: 8px;
+    cursor: pointer;
+    transition: 0.2s;
+  }
+  .seg-item.active {
+    background: #3A3A3C;
+    color: #fff;
+  }
+  .media-card {
+    background: var(--ios-card);
+    border: 1px solid var(--ios-border);
+    border-radius: 16px;
+    padding: 12px;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    margin-bottom: 10px;
+    cursor: pointer;
+    transition: transform 0.15s ease, background 0.15s ease;
+  }
+  .media-card:hover {
+    transform: scale(1.01);
+    background: #242428;
+  }
+  .media-thumb {
+    width: 62px;
+    height: 46px;
+    border-radius: 10px;
+    background: linear-gradient(135deg, #102a56, var(--ios-blue));
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 18px;
+    flex-shrink: 0;
+  }
+  .media-thumb.audio {
+    background: linear-gradient(135deg, var(--ios-indigo), #BF5AF2);
+  }
+  .media-info {
+    flex: 1;
+    min-width: 0;
+  }
+  .media-title {
+    font-size: 14px;
+    font-weight: 600;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+  .media-meta {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    margin-top: 4px;
+    font-size: 11px;
+    color: var(--text-secondary);
+  }
+  .badge {
+    background: rgba(10, 132, 255, 0.22);
+    color: var(--ios-cyan);
+    font-size: 10px;
+    font-weight: 700;
+    padding: 2px 6px;
+    border-radius: 4px;
+  }
+  .resume-bar {
+    width: 100%;
+    height: 3px;
+    background: rgba(255,255,255,0.18);
+    border-radius: 99px;
+    margin-top: 6px;
+    overflow: hidden;
+  }
+  .resume-fill {
+    height: 100%;
+    background: var(--ios-blue);
+  }
+  .ios-tab-bar {
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    height: 68px;
+    background: rgba(20, 20, 23, 0.88);
+    backdrop-filter: blur(22px);
+    border-top: 1px solid rgba(255,255,255,0.12);
+    display: flex;
+    justify-content: space-around;
+    align-items: center;
+    padding-bottom: 6px;
+  }
+  .tab-item {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 3px;
+    color: var(--text-tertiary);
+    font-size: 10px;
+    font-weight: 600;
+    cursor: pointer;
+  }
+  .tab-item.active {
+    color: var(--ios-blue);
+  }
+  .tab-icon {
+    font-size: 18px;
+  }
+
+  /* Right Panel: Full-Screen Landscape iOS 18 Video Player Simulator */
+  .player-showcase {
+    background: #090A0F;
+    border-radius: 30px;
+    border: 1px solid var(--ios-border);
+    overflow: hidden;
+    box-shadow: 0 24px 64px rgba(0,0,0,0.75);
+    display: flex;
+    flex-direction: column;
+  }
+  .video-stage {
+    position: relative;
+    width: 100%;
+    height: 440px;
+    background: radial-gradient(circle at center, #1b2845 0%, #05070c 100%);
+    overflow: hidden;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+  video {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    transition: transform 0.25s ease;
+  }
+  .player-top-bar {
+    position: absolute;
+    top: 16px;
+    left: 16px;
+    right: 16px;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    z-index: 5;
+  }
+  .frosted-pill {
+    background: var(--ios-frosted);
+    backdrop-filter: blur(18px);
+    border: 1px solid var(--ios-border);
+    border-radius: 999px;
+    padding: 8px 14px;
+    color: #fff;
+    font-size: 12px;
+    font-weight: 600;
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    cursor: pointer;
+  }
+  .frosted-pill.active {
+    background: var(--ios-blue);
+    border-color: #fff;
+  }
+  .vertical-hud {
+    position: absolute;
+    top: 50%;
+    transform: translateY(-50%);
+    width: 48px;
+    height: 170px;
+    background: var(--ios-frosted);
+    backdrop-filter: blur(18px);
+    border: 1px solid var(--ios-border);
+    border-radius: 24px;
+    padding: 12px 8px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: space-between;
+    font-size: 11px;
+    font-weight: 700;
+    z-index: 5;
+  }
+  .vertical-hud.left { left: 18px; }
+  .vertical-hud.right { right: 18px; }
+  .hud-track {
+    width: 8px;
+    flex: 1;
+    margin: 8px 0;
+    background: rgba(255,255,255,0.2);
+    border-radius: 99px;
+    display: flex;
+     align-items: flex-end;
+    overflow: hidden;
+  }
+  .hud-fill {
+    width: 100%;
+    border-radius: 99px;
+    transition: height 0.15s ease;
+  }
+  .center-transport {
+    position: absolute;
+    display: flex;
+    align-items: center;
+    gap: 28px;
+    z-index: 4;
+  }
+  .transport-btn {
+    width: 52px;
+    height: 52px;
+    border-radius: 50%;
+    background: var(--ios-frosted);
+    backdrop-filter: blur(16px);
+    border: 1px solid var(--ios-border);
+    color: #fff;
+    font-size: 17px;
+    font-weight: 700;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+  .transport-btn.play {
+    width: 72px;
+    height: 72px;
+    background: var(--ios-blue);
+    font-size: 26px;
+    box-shadow: 0 8px 28px rgba(10, 132, 255, 0.55);
+  }
+  .subtitle-caption {
+    position: absolute;
+    bottom: 132px;
+    background: rgba(0, 0, 0, 0.68);
+    padding: 6px 14px;
+    border-radius: 8px;
+    font-size: 14px;
+    font-weight: 600;
+    color: #fff;
+    border: 1px solid rgba(255,255,255,0.12);
+    z-index: 4;
+  }
+  .player-bottom-deck {
+    position: absolute;
+    bottom: 14px;
+    left: 16px;
+    right: 16px;
+    background: var(--ios-frosted);
+    backdrop-filter: blur(22px);
+    border: 1px solid var(--ios-border);
+    border-radius: 22px;
+    padding: 12px 16px;
+    z-index: 5;
+  }
+  .scrubber-row {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    font-size: 11px;
+    color: var(--text-secondary);
+    margin-bottom: 10px;
+  }
+  .scrubber-row input[type=range] {
+    flex: 1;
+    accent-color: var(--ios-blue);
+    cursor: pointer;
+  }
+  .pill-scroll {
+    display: flex;
+    gap: 8px;
+    overflow-x: auto;
+    padding-bottom: 2px;
+  }
+  .pro-drawer {
+    padding: 20px;
+    background: #131419;
+    border-top: 1px solid var(--ios-border);
+  }
+  .pro-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(210px, 1fr));
+    gap: 14px;
+    margin-top: 12px;
+  }
+  .pro-box {
+    background: var(--ios-card);
+    border: 1px solid var(--ios-border);
+    border-radius: 14px;
+    padding: 12px 14px;
+  }
+  .pro-box h4 {
+    font-size: 12px;
+    color: var(--ios-cyan);
+    text-transform: uppercase;
+    letter-spacing: 0.8px;
+    margin-bottom: 6px;
+  }
+  .pro-box p {
+    font-size: 12px;
+    color: var(--text-secondary);
+    line-height: 1.45;
+  }
+  .eq-bars {
+    display: flex;
+    align-items: flex-end;
+    gap: 6px;
+    height: 64px;
+    margin-top: 8px;
+  }
+  .eq-col {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 4px;
+  }
+  .eq-bar-bg {
+    width: 100%;
+    height: 48px;
+    background: rgba(255,255,255,0.1);
+    border-radius: 4px;
+    display: flex;
+    align-items: flex-end;
+    overflow: hidden;
+  }
+  .eq-bar-fill {
+    width: 100%;
+    background: linear-gradient(to top, var(--ios-blue), var(--ios-cyan));
+    transition: height 0.25s ease;
+  }
+  .eq-freq {
+    font-size: 9px;
+    color: var(--text-tertiary);
+  }
+</style>
+</head>
+<body>
+
+<div class="top-banner">
+  <div>
+    <div class="brand-badge">● JASH BRAND • ANDROID KOTLIN + LIBVLC 3.6.5</div>
+    <h1>Jash Media Player — Pure iOS 18 Interactive UI Preview</h1>
+  </div>
+  <div class="mode-switch-bar">
+    <button class="mode-btn active" onclick="selectPresetEq('Cinema Spatial')">🔊 Cinema Spatial EQ</button>
+    <button class="mode-btn" onclick="boostVolume200()">⚡ 200% Volume Boost</button>
+    <button class="mode-btn" onclick="toggleMirror()">🪞 Mirror Flip Video</button>
+    <button class="mode-btn" onclick="triggerShareDemo()">📲 Test "Share / Open With"</button>
+  </div>
+</div>
+
+<div class="workspace-grid">
+  <!-- LEFT: iPhone / Pure iOS 18 Home Screen Library -->
+  <div class="iphone-frame">
+    <div class="status-bar">
+      <span>9:41</span>
+      <div class="dynamic-island" id="islandStatus">▶ LibVLC Ready</div>
+      <span>5G 100%</span>
+    </div>
+
+    <div class="screen-body" id="phoneScreenBody">
+      <div class="ios-header-sub">JASH MEDIA PLAYER</div>
+      <div class="ios-header-row">
+        <div class="ios-large-title" id="tabTitle">Watch Now</div>
+        <div>
+          <button class="circle-icon-btn" title="Open Any File" onclick="loadSampleMedia('Custom Local MKV File (HEVC 10-Bit)', '4K HDR • TrueHD 7.1')">📂</button>
+        </div>
+      </div>
+
+      <input type="text" class="ios-search" id="searchInput" placeholder="Search movies, MKV, HEVC, FLAC, folders…" oninput="filterLibrary()" />
+
+      <div class="segmented-control">
+        <div class="seg-item active" onclick="setFilter('all', this)">All Media</div>
+        <div class="seg-item" onclick="setFilter('video', this)">Videos</div>
+        <div class="seg-item" onclick="setFilter('audio', this)">Hi-Res Audio</div>
+        <div class="seg-item" onclick="setFilter('stream', this)">Streams</div>
+      </div>
+
+      <div id="mediaListContainer"></div>
+    </div>
+
+    <div class="ios-tab-bar">
+      <div class="tab-item active" onclick="switchTab('Watch Now', 'all', this)">
+        <span class="tab-icon">▶️</span>
+        <span>Watch Now</span>
+      </div>
+      <div class="tab-item" onclick="switchTab('Folders', 'video', this)">
+        <span class="tab-icon">📁</span>
+        <span>Folders</span>
+      </div>
+      <div class="tab-item" onclick="switchTab('Network Stream', 'stream', this)">
+        <span class="tab-icon">🌐</span>
+        <span>Stream</span>
+      </div>
+      <div class="tab-item" onclick="switchTab('Playlists', 'audio', this)">
+        <span class="tab-icon">❤️</span>
+        <span>Playlists</span>
+      </div>
+      <div class="tab-item" onclick="triggerShareDemo()">
+        <span class="tab-icon">⚙️</span>
+        <span>Intents</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- RIGHT: Full-Screen Pure iOS 18 Video Player + Pro VLC Controls -->
+  <div class="player-showcase">
+    <div class="video-stage">
+      <video id="demoVideo" loop muted playsinline poster="">
+        <source src="https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/ForBiggerBlazes.mp4" type="video/mp4" />
+      </video>
+
+      <!-- Top Frosted Glass Bar -->
+      <div class="player-top-bar">
+        <div class="frosted-pill" style="flex:1; justify-content:space-between;">
+          <div>
+            <div id="nowPlayingTitle" style="font-size:14px; font-weight:700;">Dune_Part_Two_2024_IMAX_10bit.mkv</div>
+            <div id="nowPlayingCodec" style="font-size:11px; color:var(--ios-cyan);">HEVC 10-bit HDR10 • 3840×2160 @ 60fps • Dolby Atmos E-AC3 • Full HW</div>
+          </div>
+          <span class="badge" id="speedBadge">1.00×</span>
+        </div>
+        <button class="frosted-pill" id="bgAudioBtn" onclick="toggleBgAudio()">🎧 BG Audio</button>
+        <button class="frosted-pill" onclick="alert('Picture-in-Picture (PiP) launched! On Android, pressing Home or tapping PiP floats Jash Media Player over any app.')">🖼️ PiP</button>
+      </div>
+
+      <!-- Left Brightness HUD (iOS Frosted Vertical Bar) -->
+      <div class="vertical-hud left" title="Click to cycle Brightness">
+        <span id="brightLabel">85%</span>
+        <div class="hud-track" onclick="cycleBrightness()">
+          <div class="hud-fill" id="brightFill" style="height:85%; background:var(--ios-orange);"></div>
+        </div>
+        <span>☀️</span>
+      </div>
+
+      <!-- Right 200% Volume Boost HUD (iOS Frosted Vertical Bar) -->
+      <div class="vertical-hud right" title="Click to adjust 0–200% Volume Boost">
+        <span id="volLabel">140%</span>
+        <div class="hud-track" onclick="boostVolume200()">
+          <div class="hud-fill" id="volFill" style="height:70%; background:var(--ios-blue);"></div>
+        </div>
+        <span>🔊</span>
+      </div>
+
+      <!-- Center Transport -->
+      <div class="center-transport">
+        <button class="transport-btn" onclick="skipSeconds(-10)">-10s</button>
+        <button class="transport-btn play" id="playPauseBtn" onclick="togglePlay()">▶</button>
+        <button class="transport-btn" onclick="skipSeconds(10)">+10s</button>
+      </div>
+
+      <!-- Active Subtitle Overlay -->
+      <div class="subtitle-caption" id="subtitleBox">
+        [English SRT • Sync: +0ms] "Universal LibVLC 3.6.5 Engine — Playing MKV 10-Bit HEVC cleanly."
+      </div>
+
+      <!-- Bottom Frosted Deck -->
+      <div class="player-bottom-deck">
+        <div class="scrubber-row">
+          <span id="timeElapsed">04:18</span>
+          <input type="range" id="timelineSlider" min="0" max="100" value="34" oninput="scrubTimeline(this.value)" />
+          <span id="timeRemaining">-08:24</span>
+        </div>
+
+        <div class="pill-scroll">
+          <button class="frosted-pill" onclick="cycleAudioTrack()">🎙️ Audio: <span id="audioTrackName">Dolby E-AC3 5.1</span></button>
+          <button class="frosted-pill" onclick="cycleSubtitles()">💬 Sub: <span id="subTrackName">English (.SRT)</span></button>
+          <button class="frosted-pill" onclick="cycleSpeed()">⏩ Speed: <span id="speedPillText">1.00×</span></button>
+          <button class="frosted-pill" id="abBtn" onclick="cycleAbRepeat()">🔁 A–B Loop: Off</button>
+          <button class="frosted-pill" onclick="cycleAspect()">📐 <span id="aspectText">Best Fit</span></button>
+          <button class="frosted-pill" id="mirrorBtn" onclick="toggleMirror()">🪞 Mirror Flip</button>
+          <button class="frosted-pill" onclick="cycleSleepTimer()">🌙 <span id="sleepText">Sleep: Off</span></button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Bottom Interactive Inspector: 10-Band EQ & System Share/Open-With Sheet -->
+    <div class="pro-drawer">
+      <div style="display:flex; justify-content:space-between; align-items:center;">
+        <h3 style="font-size:16px; font-weight:700;">Pro VLC Engine + Extra Controls (Included in Kotlin Source)</h3>
+        <span style="font-size:12px; color:var(--ios-green); font-weight:600;">✓ Signed Release APK Ready via GitHub Actions</span>
+      </div>
+
+      <div class="pro-grid">
+        <div class="pro-box">
+          <h4>10-Band Equalizer (<span id="eqPresetLabel">Cinema Spatial</span>)</h4>
+          <p>Pre-amp + 10 frequencies (31Hz–16kHz) + up to 200% software volume boost.</p>
+          <div class="eq-bars" id="eqBarsContainer"></div>
+        </div>
+
+        <div class="pro-box">
+          <h4>"Share to Jash Media Player"</h4>
+          <p>Registered for <code>ACTION_SEND</code> & <code>ACTION_SEND_MULTIPLE</code>. Share videos, audio, or stream URLs directly from WhatsApp, Telegram, Chrome, or Files.</p>
+          <div style="margin-top:8px; font-size:11px; color:var(--ios-cyan); font-weight:600;" id="shareStatusText">Status: ShareReceiverActivity Active</div>
+        </div>
+
+        <div class="pro-box">
+          <h4>"Open with Jash Media Player"</h4>
+          <p>Registered for <code>ACTION_VIEW</code> across <code>video/*</code>, <code>audio/*</code>, MKV, AVI, MOV, FLAC, M3U8, DASH, RTSP, RTMP, and SMB.</p>
+          <div style="margin-top:8px; font-size:11px; color:var(--ios-green); font-weight:600;">Status: Default Handler Ready</div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+  const mediaItems = [
+    { title: "Dune_Part_Two_2024_IMAX_10bit.mkv", badge: "4K HDR", meta: "2h 46m • 8.4 GB • Movies", type: "video", codec: "HEVC 10-bit HDR10 • 3840×2160 @ 60fps • Dolby E-AC3", resume: 68 },
+    { title: "Oppenheimer_2023_BluRay_Remux.mkv", badge: "4K UHD", meta: "3h 00m • 11.2 GB • Downloads", type: "video", codec: "AV1 10-bit • 3840×2160 @ 24fps • DTS-HD MA 5.1", resume: 35 },
+    { title: "Blade_Runner_2049_OpenMatte.avi", badge: "1080p FHD", meta: "2h 44m • 3.1 GB • Cinema", type: "video", codec: "MPEG-4 Xvid • 1920×1080 • AC3 Stereo", resume: 0 },
+    { title: "Hans_Zimmer_Interstellar_Suite.flac", badge: "Hi-Res 24-Bit", meta: "12:40 • 148 MB • Music", type: "audio", codec: "FLAC Lossless • 96kHz / 24-bit • 2.0 Stereo", resume: 45 },
+    { title: "Apple_4K_HDR_Live_Showcase.m3u8", badge: "HLS Stream", meta: "LIVE • Adaptive Bitrate • Network", type: "stream", codec: "HLS .m3u8 Network Stream • 1500ms Cache", resume: 0 },
+    { title: "RTSP_Studio_Camera_Feed.rtsp", badge: "RTSP Live", meta: "rtsp://192.168.1.50:554/live", type: "stream", codec: "RTSP Low-Latency Stream • H.264", resume: 0 }
+  ];
+
+  let currentFilter = 'all';
+  let isPlaying = false;
+  let isMirrored = false;
+  let currentSpeedIdx = 2;
+  const speeds = [0.5, 0.75, 1.0, 1.25, 1.5, 2.0, 3.0, 4.0];
+  let abState = 0;
+  let aspectIdx = 0;
+  const aspects = ["Best Fit", "16:9 Widescreen", "21:9 CinemaScope", "Fill / Crop"];
+  let audioIdx = 0;
+  const audioTracks = ["Dolby E-AC3 5.1", "DTS-HD Master Audio", "Japanese Original 2.0"];
+  let subIdx = 0;
+  const subTracks = ["English (.SRT)", "Arabic (.ASS)", "Hindi (.SRT)", "Subtitles Off"];
+  let sleepIdx = 0;
+  const sleepModes = ["Sleep: Off", "Sleep: 15m", "Sleep: 30m", "Sleep: 60m", "End of Video"];
+
+  function renderLibrary() {
+    const q = document.getElementById('searchInput').value.toLowerCase();
+    const container = document.getElementById('mediaListContainer');
+    container.innerHTML = '';
+
+    mediaItems
+      .filter(item => (currentFilter === 'all' || item.type === currentFilter) && item.title.toLowerCase().includes(q))
+      .forEach(item => {
+        const div = document.createElement('div');
+        div.className = 'media-card';
+        div.onclick = () => loadSampleMedia(item.title, item.codec);
+        div.innerHTML = `
+          <div class="media-thumb ${item.type === 'audio' ? 'audio' : ''}">
+            ${item.type === 'audio' ? '🎵' : (item.type === 'stream' ? '🌐' : '▶')}
+          </div>
+          <div class="media-info">
+            <div class="media-title">${item.title}</div>
+            <div class="media-meta">
+              <span class="badge">${item.badge}</span>
+              <span>${item.meta}</span>
+            </div>
+            ${item.resume > 0 ? `<div class="resume-bar"><div class="resume-fill" style="width:${item.resume}%"></div></div>` : ''}
+          </div>
+        `;
+        container.appendChild(div);
+      });
+  }
+
+  function setFilter(filter, el) {
+    currentFilter = filter;
+    document.querySelectorAll('.seg-item').forEach(i => i.classList.remove('active'));
+    el.classList.add('active');
+    renderLibrary();
+  }
+
+  function filterLibrary() {
+    renderLibrary();
+  }
+
+  function switchTab(title, filter, el) {
+    document.getElementById('tabTitle').innerText = title;
+    currentFilter = filter;
+    document.querySelectorAll('.tab-item').forEach(t => t.classList.remove('active'));
+    el.classList.add('active');
+    renderLibrary();
+  }
+
+  function loadSampleMedia(title, codec) {
+    document.getElementById('nowPlayingTitle').innerText = title;
+    document.getElementById('nowPlayingCodec').innerText = codec;
+    document.getElementById('islandStatus').innerText = "▶ Playing";
+    const vid = document.getElementById('demoVideo');
+    vid.play().catch(() => {});
+    isPlaying = true;
+    document.getElementById('playPauseBtn').innerText = "⏸";
+  }
+
+  function togglePlay() {
+    const vid = document.getElementById('demoVideo');
+    if (isPlaying) {
+      vid.pause();
+      isPlaying = false;
+      document.getElementById('playPauseBtn').innerText = "▶";
+      document.getElementById('islandStatus').innerText = "⏸ Paused";
+    } else {
+      vid.play().catch(() => {});
+      isPlaying = true;
+      document.getElementById('playPauseBtn').innerText = "⏸";
+      document.getElementById('islandStatus').innerText = "▶ Playing";
+    }
+  }
+
+  function skipSeconds(sec) {
+    const slider = document.getElementById('timelineSlider');
+    slider.value = Math.max(0, Math.min(100, parseInt(slider.value) + (sec > 0 ? 5 : -5)));
+    scrubTimeline(slider.value);
+  }
+
+  function scrubTimeline(val) {
+    const totalSec = 762;
+    const cur = Math.floor((val / 100) * totalSec);
+    const rem = totalSec - cur;
+    const fmt = s => `${String(Math.floor(s/60)).padStart(2,'0')}:${String(s%60).padStart(2,'0')}`;
+    document.getElementById('timeElapsed').innerText = fmt(cur);
+    document.getElementById('timeRemaining').innerText = "-" + fmt(rem);
+  }
+
+  function cycleSpeed() {
+    currentSpeedIdx = (currentSpeedIdx + 1) % speeds.length;
+    const sp = speeds[currentSpeedIdx].toFixed(2) + "×";
+    document.getElementById('speedBadge').innerText = sp;
+    document.getElementById('speedPillText').innerText = sp;
+    document.getElementById('demoVideo').playbackRate = speeds[currentSpeedIdx];
+  }
+
+  function toggleMirror() {
+    isMirrored = !isMirrored;
+    document.getElementById('demoVideo').style.transform = isMirrored ? "scaleX(-1)" : "scaleX(1)";
+    document.getElementById('mirrorBtn').classList.toggle('active', isMirrored);
+  }
+
+  function cycleAbRepeat() {
+    abState = (abState + 1) % 3;
+    const btn = document.getElementById('abBtn');
+    if (abState === 0) {
+      btn.innerText = "🔁 A–B Loop: Off";
+      btn.classList.remove('active');
+    } else if (abState === 1) {
+      btn.innerText = "🔁 A=04:18 → Set B";
+      btn.classList.add('active');
+    } else {
+      btn.innerText = "🔁 Loop 04:18–05:02";
+      btn.classList.add('active');
+    }
+  }
+
+  function cycleAspect() {
+    aspectIdx = (aspectIdx + 1) % aspects.length;
+    document.getElementById('aspectText').innerText = aspects[aspectIdx];
+  }
+
+  function cycleAudioTrack() {
+    audioIdx = (audioIdx + 1) % audioTracks.length;
+    document.getElementById('audioTrackName').innerText = audioTracks[audioIdx];
+  }
+
+  function cycleSubtitles() {
+    subIdx = (subIdx + 1) % subTracks.length;
+    document.getElementById('subTrackName').innerText = subTracks[subIdx];
+    const box = document.getElementById('subtitleBox');
+    if (subTracks[subIdx] === "Subtitles Off") {
+      box.style.display = "none";
+    } else {
+      box.style.display = "block";
+      box.innerText = `[${subTracks[subIdx]} • Sync: +0ms] "Universal LibVLC 3.6.5 Engine — Playing MKV 10-Bit HEVC cleanly."`;
+    }
+  }
+
+  function cycleSleepTimer() {
+    sleepIdx = (sleepIdx + 1) % sleepModes.length;
+    document.getElementById('sleepText').innerText = sleepModes[sleepIdx];
+  }
+
+  function toggleBgAudio() {
+    document.getElementById('bgAudioBtn').classList.toggle('active');
+  }
+
+  function boostVolume200() {
+    const cur = document.getElementById('volLabel').innerText;
+    const next = cur === "200%" ? 100 : (cur === "100%" ? 140 : 200);
+    document.getElementById('volLabel').innerText = next + "%";
+    const fill = document.getElementById('volFill');
+    fill.style.height = (next / 2) + "%";
+    fill.style.background = next > 100 ? "var(--ios-orange)" : "var(--ios-blue)";
+  }
+
+  function cycleBrightness() {
+    const cur = parseInt(document.getElementById('brightLabel').innerText);
+    const next = cur >= 100 ? 40 : cur + 20;
+    document.getElementById('brightLabel').innerText = next + "%";
+    document.getElementById('brightFill').style.height = next + "%";
+  }
+
+  function selectPresetEq(name) {
+    document.getElementById('eqPresetLabel').innerText = name;
+    const heights = [82, 74, 58, 45, 42, 55, 68, 78, 86, 90];
+    const freqs = ["31", "63", "125", "250", "500", "1k", "2k", "4k", "8k", "16k"];
+    const container = document.getElementById('eqBarsContainer');
+    container.innerHTML = '';
+    freqs.forEach((f, idx) => {
+      const h = Math.max(20, Math.min(95, heights[idx] + Math.floor(Math.random()*16 - 8)));
+      container.innerHTML += `
+        <div class="eq-col">
+          <div class="eq-bar-bg"><div class="eq-bar-fill" style="height:${h}%"></div></div>
+          <span class="eq-freq">${f}</span>
+        </div>
+      `;
+    });
+  }
+
+  function triggerShareDemo() {
+    loadSampleMedia("Shared_WhatsApp_Video_Stream.mkv", "Launched via 'Share to Jash Media Player' (ACTION_SEND)");
+    document.getElementById('shareStatusText').innerText = "✓ Just received external Share Intent!";
+  }
+
+  renderLibrary();
+  selectPresetEq('Cinema Spatial');
+</script>
+</body>
+</html>
