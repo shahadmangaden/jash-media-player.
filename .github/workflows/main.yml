@@ -17,10 +17,16 @@ jobs:
       - name: Checkout Repository
         uses: actions/checkout@v4
 
-      - name: Extract Jash-Media-Player-GitHub-Repo.zip
+      - name: Unpack Kotlin Project & Remove HTML Preview
         run: |
           if [ -f "Jash-Media-Player-GitHub-Repo.zip" ]; then
             unzip -o Jash-Media-Player-GitHub-Repo.zip
+            rm -f Jash-Media-Player-GitHub-Repo.zip Jash_Media_Player*.html
+            git config user.name "Jash Builder"
+            git config user.email "builder@jash.app"
+            git add -A
+            git commit -m "Unpack pure Kotlin Android project structure" || true
+            git push origin HEAD:main || true
           fi
           ls -la
 
